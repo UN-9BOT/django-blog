@@ -1,5 +1,2 @@
-mysite/blog/__pycache__
-mysite/blog/migrations/__pycache__
-mysite/mysite/__pycache__
+__pycache__
 venv
-mysite/blog/templatetags/__pycache__
