@@ -2,6 +2,7 @@ from django.db import models
 from django.urls import reverse
 from django.utils import timezone
 from django.contrib.auth.models import User
+from taggit.managers import TaggableManager
 
 
 class PublishedManager(models.Manager):
@@ -32,6 +33,7 @@ class Post(models.Model):
                                                   related_name='blog_posts')
     objects: models.Manager = models.Manager()
     published: PublishedManager = PublishedManager()
+    tags = TaggableManager()
 
     class Meta:
         ordering: list[str] = ["-publish"]
@@ -48,9 +50,8 @@ class Post(models.Model):
 
 
 class Comment(models.Model):
-    post: models.ForeignKey = models.ForeignKey(Post,
-                                                on_delete=models.CASCADE,
-                                                related_name='comments')
+    post: models.ForeignKey = models.ForeignKey(
+        Post, on_delete=models.CASCADE, related_name='comments')
     name: models.CharField = models.CharField(max_length=80)
     email: models.EmailField = models.EmailField()
     body: models.TextField = models.TextField()
