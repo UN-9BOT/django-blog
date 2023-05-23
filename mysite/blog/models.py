@@ -1,3 +1,4 @@
+"""Models for db."""
 from django.db import models
 from django.urls import reverse
 from django.utils import timezone
@@ -6,15 +7,18 @@ from taggit.managers import TaggableManager
 
 
 class PublishedManager(models.Manager):
+    """Manger for getting all post with status=PUBLISHED"""
+
     def get_queryset(self) -> models.QuerySet:
+        """Overload."""
         return super().get_queryset().filter(status=Post.Status.PUBLISHED)
 
 
 class Post(models.Model):
+    """Mode for posts."""
 
     class Status(models.TextChoices):
         """Status code. Based on enum."""
-
         DRAFT = 'DF', 'Draft'
         PUBLISHED = 'PB', 'Published'
 
@@ -36,13 +40,16 @@ class Post(models.Model):
     tags = TaggableManager()
 
     class Meta:
+        """Meta info for DB."""
         ordering: list[str] = ["-publish"]
         indexes: list[models.Index] = [models.Index(fields=["-publish"])]
 
     def __str__(self) -> str:
+        """Overload."""
         return f"{self.title}"
 
     def get_absolute_url(self) -> str:
+        """Rezolver for getting url."""
         return reverse('blog:post_detail', args=[self.publish.year,
                                                  self.publish.month,
                                                  self.publish.day,
@@ -50,6 +57,8 @@ class Post(models.Model):
 
 
 class Comment(models.Model):
+    """ Model for comment in post. """
+
     post: models.ForeignKey = models.ForeignKey(
         Post, on_delete=models.CASCADE, related_name='comments')
     name: models.CharField = models.CharField(max_length=80)

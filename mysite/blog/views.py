@@ -1,3 +1,4 @@
+"""Views for pages."""
 from typing import Optional
 
 from django.db.models import QuerySet, Count
@@ -6,7 +7,8 @@ from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, render
 from django.views.generic import ListView
 from django.views.decorators.http import require_POST
-from django.contrib.postgres.search import SearchVector
+from django.contrib.postgres.search import (
+    SearchVector, SearchQuery, SearchRank)
 
 
 from taggit.models import Tag
@@ -25,6 +27,7 @@ class PostListView(ListView):
 
 def post_list(request: HttpRequest,
               tag_slug: Optional[SlugField] = None) -> HttpResponse:
+    """View for all post. """
     posts: QuerySet = Post.published.all()
     tag = None
     if tag_slug:
@@ -36,6 +39,7 @@ def post_list(request: HttpRequest,
 
 def post_detail(request: HttpRequest, year: int, month: int, day: int,
                 post: Post) -> HttpResponse:
+    """View for 1 post. """
     post = get_object_or_404(
         Post, status=Post.Status.PUBLISHED, slug=post, publish__year=year,
         publish__month=month, publish__day=day)
@@ -81,9 +85,12 @@ def post_search(request: HttpRequest):
         form = SearchForm(request.GET)
         if form.is_valid():
             query = form.cleaned_data['query']
+            search_query = SearchQuery(query)
+            search_vector = SearchVector('title', 'body')
             results = Post.published.annotate(
-                search=SearchVector('title', 'body'),
-            ).filter(search=query)
+                search=search_vector,
+                rank=SearchRank(search_vector, search_query)).filter(
+                search=search_query).order_by('-rank')
 
     return render(request, "blog/post/search.html", {
         'form': form, 'query': query, 'results': results
