@@ -1,6 +1,6 @@
-from django.urls import path
-from .feeds import LatestPostsFeed
 from . import views
+from .feeds import LatestPostsFeed
+from django.urls import path
 
 app_name = 'blog'
 
